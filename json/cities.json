@@ -1,0 +1,69 @@
+[
+    {
+        "state": "AL",
+        "cities": [
+            "Adamsville",
+            "Addison",
+            "Akron",
+            "Alabaster",
+            "Albertville",
+            "Alexander City",
+            "Aliceville",
+            "Allgood",
+            "Altoon",
+            "Adalusia",
+            "Anderson"
+        ]        
+    },
+    {
+        "state":"CO",
+        "cities": [
+            "Aguilar",
+            "Akron",
+            "Alamosa",
+            "Alma",
+            "Antonito",
+            "Arriba",
+            "Arvada",
+            "Aspen",
+            "Ault",
+            "Aurora",
+            "Avon",
+            "Basalt",
+            "Bayfield",
+            "Bennett",
+            "Berthoud",
+            "Bethune",
+            "Black Hawk",
+            "Blanca",
+            "Blue River",
+            "Bonanza",
+            "Boone",
+            "Boulder"
+        ]            
+    },
+    {
+        "state": "IN",
+        "cities" : [
+            "Alexandria",
+            "Anderson",
+            "Angola",
+            "Attica",
+            "Auburn",
+            "Aurora",
+            "Austin",
+            "Batesville",
+            "Bedford",
+            "Beech Grove",
+            "Berne",
+            "Bicknell",
+            "Bloomington",
+            "Bluffton",
+            "Boonville",
+            "Brazil",
+            "Butler",
+            "Cannelton",
+            "Carmel"
+        ]
+    }            
+]            
