@@ -168,20 +168,22 @@ rp.AutoComplete = class AutoComplete
         this.handlers.onItemListChange = function(e) 
         {
             let sel = getSelectedItem(e.target);
+            that.assignItem(sel);
+            return;
 
-            if (typeof that.options.onDisplay == 'function') {
-                sel.inputElement.value = 
-                    that.options.onDisplay(sel.text, sel.value);
-            }
-            else {
-                if (that.options.display == 'text') {
-                    sel.inputElement.value = sel.text;
-                }
-                else {
-                    sel.inputElement.value = sel.value;
-                }
-            }                
-            sel.inputElement.setAttribute('data-value', sel.value);
+            // if (typeof that.options.onDisplay == 'function') {
+            //     sel.inputElement.value = 
+            //         that.options.onDisplay(sel.text, sel.value);
+            // }
+            // else {
+            //     if (that.options.display == 'text') {
+            //         sel.inputElement.value = sel.text;
+            //     }
+            //     else {
+            //         sel.inputElement.value = sel.value;
+            //     }
+            // }                
+            // sel.inputElement.setAttribute('data-value', sel.value);
 
             if (typeof that.options.onChange === 'function') {
                 that.options.onChange(sel.value);
