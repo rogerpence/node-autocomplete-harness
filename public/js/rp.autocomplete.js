@@ -72,6 +72,8 @@ rp.AutoComplete = class AutoComplete
         this.itemList.style.width = inputElementLocation.width + 'px';
         this.itemList.style.display = 'inline';
         this.itemList.selectedIndex = 0;
+        let sel = this.getSelectedTextAndValue();
+        this.assignItem(sel);
         this.itemList.focus();
     }
 
@@ -112,21 +114,21 @@ rp.AutoComplete = class AutoComplete
         }
         else {
             if (this.options.display == 'text') {
-                this.itemInput.inputElement.value = sel.text;
+                this.itemInput.value = sel.text;
             }
             else {
-                this.itemInput.inputElement.value = sel.value;
+                this.itemInput.value = sel.value;
             }
         }                
-        this.itemInput.inputElement.setAttribute('data-value', sel.value);    
+        this.itemInput.setAttribute('data-value', sel.value);    
     }
 
-    getSelectedItem() {
+    getSelectedTextAndValue() {
         let index = this.itemList.selectedIndex;
         if (index === -1) {
             index = 0;
         }
-        let opt = el.options[index];
+        let opt = this.itemList.options[index];
         let value = opt.dataset.value;
         let text = opt.value;
 
@@ -139,26 +141,6 @@ rp.AutoComplete = class AutoComplete
     assignEventhandlers() 
     {
         let that = this;
-
-        // todo: move this out of assignEventHandlers
-        // and also remove its 'el' dependence.             
-        let getSelectedItem = function(el) {
-            let inputItemId = el.getAttribute('data-input');
-            let inputElement = document.getElementById(inputItemId);
-            let index = el.selectedIndex;
-            if (index === -1) {
-                index = 0;
-            }
-            let opt = el.options[index];
-            let value = opt.dataset.value;
-            let text = opt.value;
-
-            return {
-                inputElement: inputElement,
-                text: text,
-                value: value
-            }
-        };
 
         this.handlers.onItemKeyUp = function(e) 
         {
@@ -190,7 +172,7 @@ rp.AutoComplete = class AutoComplete
 
         this.handlers.onItemListChange = function(e) 
         {
-            let sel = that.getSelectedItem();
+            let sel = that.getSelectedTextAndValue();
             that.assignItem(sel);
 
             if (typeof that.options.onItemListChange === 'function') {
@@ -233,12 +215,11 @@ rp.AutoComplete = class AutoComplete
 
             e.target.style.display = 'none';
             if (typeof that.options.onItemListBlur === 'function') {
-                let sel = that.getSelectedItem();
+                let sel = that.getSelectedTextAndValue();
                 that.assignItem(sel);
                 that.options.onItemListBlur(sel.text, sel.value);
             }            
         };
-
       
         // 'keyup' event on search input element.            
         this.itemInput.addEventListener('keyup', this.handlers.onItemKeyUp);
