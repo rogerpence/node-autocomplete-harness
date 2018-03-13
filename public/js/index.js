@@ -21,12 +21,16 @@ let stateListOptions = {
     itemInputId: 'state',        
     url: 'api/states?startswith=',
     size: 16,
-    onBlur: function(sel) {
+    onItemListBlur: function(sel) {
         let selectedValue = document.getElementById('state').getAttribute('data-value');   
         cityList.getList(selectedValue);
+        document.getElementById('city').focus();        
     },
-    onShiftTab: function() {
-        console.log('shift tab from states');
+    onItemListChange: function(value) {
+        console.log(`on change; value is ${value}`);
+    },    
+    onItemFocus: function() {
+        console.log('states textbox focused');
     }
 }
 
@@ -36,12 +40,16 @@ let cityListOptions = {
     itemInputId: 'city',        
     url: 'api/cities?state=',
     size: 16,
-    onBlur: function(sel) {
+    onItemListBlur: function(sel) {
         console.log(sel);
+        document.getElementById('rate').focus();
     },
-    onShiftTab: function() {
-        console.log('shift tab from cities');
+    onItemFocus: function() {
+        console.log('cities textbox focused');
+        document.getElementById('state').focus();
+        
     }
+    
 }
 
 let cityList = new rp.AutoComplete(cityListOptions);

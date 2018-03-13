@@ -125,7 +125,9 @@ rp.AutoComplete = class AutoComplete
     {
         let that = this;
 
-        let getSelectedItem = function (el) {
+        // todo: move this out of assignEventHandlers
+        // and also remove its 'el' dependence.             
+        let getSelectedItem = function(el) {
             let inputItemId = el.getAttribute('data-input');
             let inputElement = document.getElementById(inputItemId);
             let index = el.selectedIndex;
@@ -165,28 +167,19 @@ rp.AutoComplete = class AutoComplete
             e.currentTarget.style.display = 'none';
         };
 
+        this.handlers.onItemFocus = function(e) {
+            if (typeof that.options.onItemFocus === 'function') {
+                that.options.onItemFocus();
+            }            
+        }
+
         this.handlers.onItemListChange = function(e) 
         {
             let sel = getSelectedItem(e.target);
             that.assignItem(sel);
-            return;
 
-            // if (typeof that.options.onDisplay == 'function') {
-            //     sel.inputElement.value = 
-            //         that.options.onDisplay(sel.text, sel.value);
-            // }
-            // else {
-            //     if (that.options.display == 'text') {
-            //         sel.inputElement.value = sel.text;
-            //     }
-            //     else {
-            //         sel.inputElement.value = sel.value;
-            //     }
-            // }                
-            // sel.inputElement.setAttribute('data-value', sel.value);
-
-            if (typeof that.options.onChange === 'function') {
-                that.options.onChange(sel.value);
+            if (typeof that.options.onItemListChange === 'function') {
+                that.options.onItemListChange(sel.value);
             }
         };
 
@@ -223,16 +216,19 @@ rp.AutoComplete = class AutoComplete
             }
 
             e.target.style.display = 'none';
-            if (typeof that.options.onBlur === 'function') {
+            if (typeof that.options.onItemListBlur === 'function') {
                 let sel = getSelectedItem(e.target);
                 that.assignItem(sel);
-                that.options.onBlur(sel);
+                that.options.onItemListBlur(sel);
             }            
         };
-       
+
+      
         // 'keyup' event on search input element.            
         this.itemInput.addEventListener('keyup', this.handlers.onItemKeyUp);
 
+        this.itemInput.addEventListener('focus', this.handlers.onItemFocus);
+        
         // Click event on list presented. 
         // 'change' has already fired and set the selected 
         // value so just make the list go away. 
@@ -252,5 +248,7 @@ rp.AutoComplete = class AutoComplete
         // 'blur' event on list presented.
         // Governs behavior when list presented loses focus.
         this.itemList.addEventListener('blur', this.handlers.onItemListBlur);        
+
+        
     }
 }
