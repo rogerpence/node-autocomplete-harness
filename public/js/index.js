@@ -21,7 +21,7 @@ let stateListOptions = {
     itemInputId: 'state',        
     url: 'api/states?startswith=',
     size: 16,
-    onItemListBlur: function(sel) {
+    onItemListBlur: function(text, value) {
         let selectedValue = document.getElementById('state').getAttribute('data-value');   
         cityList.getList(selectedValue);
         document.getElementById('city').focus();        

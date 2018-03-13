@@ -107,19 +107,34 @@ rp.AutoComplete = class AutoComplete
 
     assignItem(sel) {
         if (typeof this.options.onDisplay == 'function') {
-            sel.inputElement.value = 
+            this.itemInput.value = 
                 this.options.onDisplay(sel.text, sel.value);
         }
         else {
             if (this.options.display == 'text') {
-                sel.inputElement.value = sel.text;
+                this.itemInput.inputElement.value = sel.text;
             }
             else {
-                sel.inputElement.value = sel.value;
+                this.itemInput.inputElement.value = sel.value;
             }
         }                
-        sel.inputElement.setAttribute('data-value', sel.value);    
+        this.itemInput.inputElement.setAttribute('data-value', sel.value);    
     }
+
+    getSelectedItem() {
+        let index = this.itemList.selectedIndex;
+        if (index === -1) {
+            index = 0;
+        }
+        let opt = el.options[index];
+        let value = opt.dataset.value;
+        let text = opt.value;
+
+        return {
+            text: text,
+            value: value
+        }
+    };
 
     assignEventhandlers() 
     {
@@ -175,7 +190,7 @@ rp.AutoComplete = class AutoComplete
 
         this.handlers.onItemListChange = function(e) 
         {
-            let sel = getSelectedItem(e.target);
+            let sel = that.getSelectedItem();
             that.assignItem(sel);
 
             if (typeof that.options.onItemListChange === 'function') {
@@ -218,9 +233,9 @@ rp.AutoComplete = class AutoComplete
 
             e.target.style.display = 'none';
             if (typeof that.options.onItemListBlur === 'function') {
-                let sel = getSelectedItem(e.target);
+                let sel = that.getSelectedItem();
                 that.assignItem(sel);
-                that.options.onItemListBlur(sel);
+                that.options.onItemListBlur(sel.text, sel.value);
             }            
         };
 
