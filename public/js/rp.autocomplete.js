@@ -204,6 +204,7 @@ rp.AutoComplete = class AutoComplete
                 e.preventDefault();
                 e.stopPropagation();
                 that.itemList.style.display = 'none';
+                that.itemInput.focus();
                 return;
             }                    
         };
