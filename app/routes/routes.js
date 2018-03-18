@@ -36,5 +36,27 @@ module.exports = function(app) {
         }            
         res.send(result);
     });
+
+    app.get('/api/city', (req, res) => {
+        const cities = require('../../json/cities.json');
+        const state = req.query.state;
+        const startsWith = req.query.startswith.toLowerCase();        
+        let result = [];
+
+        for (var i = 0; i < cities.length; i++) {            
+            if (cities[i].state === state) {
+                for (var j = 0; j < cities[i].cities.length; j++) {   
+                    let city = cities[i].cities[j].toLowerCase();                        
+                    if (city.substring(0, startsWith.length) >= startsWith) {
+                        result.push({"text": cities[i].cities[j], 
+                                     "value": cities[i].state})
+                    }                                                
+                }                    
+                break;
+            }
+        }            
+        res.send(result);
+    });
+    
     
 };

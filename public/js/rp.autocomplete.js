@@ -13,6 +13,7 @@ rp.AutoComplete = class AutoComplete
         rp.dom.setObjectDefaultValue(options, 'valueField', 'value');
         rp.dom.setObjectDefaultValue(options, 'selectClass', '');
         rp.dom.setObjectDefaultValue(options, 'divClass', '');
+        rp.dom.setObjectDefaultValue(options, 'incrementalSearch', false);
 
         options.selectId = options.itemInputId + '_select';
 
@@ -72,13 +73,26 @@ rp.AutoComplete = class AutoComplete
         this.itemList.style.width = inputElementLocation.width + 'px';
         this.itemList.style.display = 'inline';
         this.itemList.selectedIndex = 0;
-        let sel = this.getSelectedTextAndValue();
-        this.assignItem(sel);
+
+        //
+        // The two lines that follow code ensure the input element's value 
+        // is set to the first item in the list. I don't think this is the 
+        // appropriate behavior. It's too cumbersome to remove an entire 
+        // value to start the search over again.
+        //
+        // let sel = this.getSelectedTextAndValue();
+        // this.assignItem(sel);
+
         this.itemList.focus();
     }
 
     getList(searchValue) 
     {
+
+        if (typeof this.options.onSetQueryString === 'function') {
+            searchValue = this.options.onSetQueryString(searchValue);
+        }
+
         let opts = {
             url: this.options.url + searchValue,
             method: 'GET',
@@ -107,20 +121,20 @@ rp.AutoComplete = class AutoComplete
         rp.dom.removeElement(this.itemList);         
     }
 
-    assignItem(sel) {
-        if (typeof this.options.onDisplay == 'function') {
+    assignItem(text, value) {
+        if (typeof this.options.onItemListDisplay == 'function') {
             this.itemInput.value = 
-                this.options.onDisplay(sel.text, sel.value);
+                this.options.onItemListDisplay(text, value);
         }
         else {
             if (this.options.display == 'text') {
-                this.itemInput.value = sel.text;
+                this.itemInput.value = text;
             }
             else {
-                this.itemInput.value = sel.value;
+                this.itemInput.value = value;
             }
         }                
-        this.itemInput.setAttribute('data-value', sel.value);    
+        this.itemInput.setAttribute('data-value', value);    
     }
 
     getSelectedTextAndValue() {
@@ -154,7 +168,7 @@ rp.AutoComplete = class AutoComplete
                 clearInterval(this.timer);
             }
 
-            this.timer = setTimeout(function () {
+            this.timer = setTimeout(function() {
                 that.getList(e.target.value);
             }, that.options.wait)
         };
@@ -173,7 +187,7 @@ rp.AutoComplete = class AutoComplete
         this.handlers.onItemListChange = function(e) 
         {
             let sel = that.getSelectedTextAndValue();
-            that.assignItem(sel);
+            that.assignItem(sel.text, sel.value);
 
             if (typeof that.options.onItemListChange === 'function') {
                 that.options.onItemListChange(sel.value);
@@ -185,6 +199,23 @@ rp.AutoComplete = class AutoComplete
             const ESCAPE_KEY = 27;
             const BACKSPACE = 8;
             const TAB_KEY = 9;
+            const a_KEY = 65;
+            const z_KEY = 90;
+
+            if (e.keyCode >= a_KEY && e.keyCode <= z_KEY) {
+                that.itemInput.value = that.itemInput.value + String.fromCharCode(e.keyCode).toLocaleLowerCase();
+                e.preventDefault();
+                e.stopPropagation();
+                that.itemList.style.display = 'none';
+
+                if (that.options.incrementalSearch) {
+                    that.getList(that.itemInput.value);
+                }
+                else {
+                    that.itemInput.focus();
+                }
+                return;
+            }
 
             if (e.keyCode == ESCAPE_KEY) {
                 that.itemList.style.display = 'none';
@@ -201,22 +232,37 @@ rp.AutoComplete = class AutoComplete
                 e.preventDefault();
                 e.stopPropagation();
                 that.itemList.style.display = 'none';
-                that.itemInput.focus();
+
+                if (that.options.incrementalSearch) {
+                    that.getList(that.itemInput.value);
+                }
+                else {
+                    that.itemInput.focus();
+                }
                 return;
             }                    
         };
 
         this.handlers.onItemListBlur = function(e) 
         {
+
             if (that.itemList.style.display === 'none') {
                 that.itemInput.focus();
                 return;
             }
 
+            
+            if (that.options.focusElementAfterSearch) {
+                let nextEl = document.getElementById(that.options.focusElementAfterSearch)
+                if (nextEl) {
+                    nextEl.focus();
+                }
+            }
+
             e.target.style.display = 'none';
             if (typeof that.options.onItemListBlur === 'function') {
                 let sel = that.getSelectedTextAndValue();
-                that.assignItem(sel);
+                that.assignItem(sel.text, sel.value);
                 that.options.onItemListBlur(sel.text, sel.value);
             }            
         };
@@ -245,7 +291,5 @@ rp.AutoComplete = class AutoComplete
         // 'blur' event on list presented.
         // Governs behavior when list presented loses focus.
         this.itemList.addEventListener('blur', this.handlers.onItemListBlur);        
-
-        
     }
 }
