@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <% include ../partials/head %>    
+    <br>
+    <% include ../partials/header %>    
+    <br>
+    <% include ../partials/footer %>    
+    <br>
+    hello
+    <br>
+    <ul>
+        <% drinks.forEach(function(drink) { %>
+            <li><%= drink.name %> - <%= drink.drunkness %></li>
+        <% }); %>
+    </ul>    
+</body>
+</html>
