@@ -15,14 +15,14 @@ rp.AutoComplete = class AutoComplete
         rp.dom.setObjectDefaultValue(options, 'divClass', '');
         rp.dom.setObjectDefaultValue(options, 'incrementalSearch', false);
 
-        options.selectId = options.itemInputId + '_select';
+        options.selectId = options.itemInputId + '__select';
 
         this.options = options;
         this.options.ajaxAction = this.showList;
 
         let selectTag = document.getElementById(this.options.selectId)
         if (!selectTag) {
-            let sb = new rp.string.StringBuilder();
+            let sb = new rp.StringBuilder();
             sb.append(`<div class="${options.divClass}">`);            
             sb.append(`<select class="${options.selectClass}"`);
             sb.append(' style="position:absolute;display:none;"');
@@ -33,14 +33,30 @@ rp.AutoComplete = class AutoComplete
         }
 
         this.itemInput = document.getElementById(options.itemInputId);
+        if (!this.itemInput) {
+            console.error('Element not found in rp.autocomplete constructor');
+            console.error('Element Id not found ===> ' + options.itemInputId);
+            throw new Error('Element not found in rp.autocomplete constructor: ' + options.itemInputId);
+        }
         this.itemInput.setAttribute('data-value', '');
 
         this.itemList = document.getElementById(options.selectId);
+        if (!this.itemList) {
+            console.error('Element not found in rp.autocomplete constructor');
+            console.error('Element Id not found ===> ' + options.selectId);
+            throw new Error('Element not found in rp.autocomplete constructor: ' + options.selectId);
+        }
+
         this.timer = null;
         this.value = null;
         this.handlers = {}
 
         this.assignEventhandlers();
+    }
+
+    clearInputItem() {
+        this.itemInput.value = '';
+        this.itemInput.setAttribute('data-value', '');        
     }
 
     showList(json) 
@@ -88,13 +104,12 @@ rp.AutoComplete = class AutoComplete
 
     getList(searchValue) 
     {
-
         if (typeof this.options.onSetQueryString === 'function') {
-            searchValue = this.options.onSetQueryString(searchValue);
+            searchValue = this.options.onSetQueryString.call(this, searchValue);
         }
 
         let opts = {
-            url: this.options.url + searchValue,
+            url: this.options.url + searchValue,            
             method: 'GET',
             headers: new Headers({
                 'content-type': 'application/json',
@@ -124,7 +139,7 @@ rp.AutoComplete = class AutoComplete
     assignItem(text, value) {
         if (typeof this.options.onItemListDisplay == 'function') {
             this.itemInput.value = 
-                this.options.onItemListDisplay(text, value);
+                this.options.onItemListDisplay.call(this, text, value);
         }
         else {
             if (this.options.display == 'text') {
@@ -135,6 +150,7 @@ rp.AutoComplete = class AutoComplete
             }
         }                
         this.itemInput.setAttribute('data-value', value);    
+        this.itemInput.value = text;
     }
 
     getSelectedTextAndValue() {
@@ -143,6 +159,11 @@ rp.AutoComplete = class AutoComplete
             index = 0;
         }
         let opt = this.itemList.options[index];
+
+        if (typeof opt === undefined) {
+            return undefined;
+        }            
+
         let value = opt.dataset.value;
         let text = opt.value;
 
@@ -175,23 +196,25 @@ rp.AutoComplete = class AutoComplete
 
         this.handlers.onItemListClick = function(e) 
         {
-            e.currentTarget.style.display = 'none';
+            that.handlers.onItemListBlur(e);
         };
 
         this.handlers.onItemFocus = function(e) {
             if (typeof that.options.onItemFocus === 'function') {
-                that.options.onItemFocus();
+                that.options.onItemFocus.call(that);
             }            
         }
 
         this.handlers.onItemListChange = function(e) 
         {
             let sel = that.getSelectedTextAndValue();
-            that.assignItem(sel.text, sel.value);
+            if (sel !== undefined ) {
+                that.assignItem(sel.text, sel.value);
 
-            if (typeof that.options.onItemListChange === 'function') {
-                that.options.onItemListChange(sel.value);
-            }
+                if (typeof that.options.onItemListChange === 'function') {
+                    that.options.onItemListChange.call(that, sel.value);
+                }
+            }                
         };
 
         this.handlers.onItemListKeyUp = function(e) 
@@ -219,7 +242,7 @@ rp.AutoComplete = class AutoComplete
 
             if (e.keyCode == ESCAPE_KEY) {
                 that.itemList.style.display = 'none';
-                that.itemInput.value = '';
+                that.clearInputItem();
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -245,25 +268,41 @@ rp.AutoComplete = class AutoComplete
 
         this.handlers.onItemListBlur = function(e) 
         {
-
             if (that.itemList.style.display === 'none') {
                 that.itemInput.focus();
                 return;
             }
-
             
-            if (that.options.focusElementAfterSearch) {
-                let nextEl = document.getElementById(that.options.focusElementAfterSearch)
+            if (that.options.focusElementIdAfterSearch) {
+                let nextEl = document.getElementById(that.options.focusElementIdAfterSearch)
                 if (nextEl) {
                     nextEl.focus();
                 }
             }
 
             e.target.style.display = 'none';
+
+            // Assign selected value to target value element if available.
+            // Check if a target element ID is expliclitly provided.
+            let target = document.getElementById(that.options.targetValueElementId);
+            if (!target) {
+                // If not check for __value element.
+                target = document.getElementById(that.options.itemInputId + '__value');                
+            }
+            if (target) {
+                let sel = that.getSelectedTextAndValue();                    
+                target.value = sel.value;
+            }                
+            
             if (typeof that.options.onItemListBlur === 'function') {
                 let sel = that.getSelectedTextAndValue();
-                that.assignItem(sel.text, sel.value);
-                that.options.onItemListBlur(sel.text, sel.value);
+                if (sel !== undefined) {
+                    that.assignItem(sel.text, sel.value);
+                    that.options.onItemListBlur.call(that, sel.text, sel.value);
+                }                    
+                else {
+                    that.options.onItemListBlur.call(that, undefined);                    
+                }
             }            
         };
       

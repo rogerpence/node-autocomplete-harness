@@ -17,6 +17,10 @@ app.get('/cascade', function(req, res) {
   res.sendFile(path.join(__dirname + '/cascade.html'))
 });
 
+app.get('/multiple', function(req, res) {
+  res.sendFile(path.join(__dirname + '/multiple.html'))
+});
+
 
 app.listen(port, () => {
   console.log('We are live on ' + port);

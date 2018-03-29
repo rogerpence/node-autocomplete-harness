@@ -1,0 +1,8 @@
+../../node_modules/uglify-es/bin/uglifyjs rp.string.js rp.dom.js rp.ajax.js rp.autocomplete.js --source-map -o rp.lib.min.js -c
+
+cp rp.ajax.js ../../../../Client/rp.lib.js/src
+cp rp.dom.js ../../../../Client/rp.lib.js/src
+cp rp.string.js ../../../../Client/rp.lib.js/src
+cp rp.autocomplete.js ../../../../Client/rp.lib.js/src
+
+cp rp.lib.min.js ../../../../Client/rp.lib.js/production
